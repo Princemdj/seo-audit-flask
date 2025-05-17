@@ -1,3 +1,8 @@
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+
 from flask import Flask, request, jsonify
 from bs4 import BeautifulSoup
 import requests
