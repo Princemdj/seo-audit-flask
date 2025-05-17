@@ -9,7 +9,7 @@ app = Flask(__name__)
 def home():
     return "🚀 SEO Audit API is running."
 
-@app.route("/audit", methods=["POST"])
+@app.route("/audit", methods=["GET"])
 def audit():
     data = request.get_json()
     url = data.get("url")
