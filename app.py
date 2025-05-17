@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
-import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urlparse
+import requests
+import os
 
 app = Flask(__name__)
 
@@ -13,28 +13,30 @@ def home():
 def audit():
     data = request.get_json()
     url = data.get("url")
-
+    
     if not url:
-        return jsonify({"success": False, "error": "URL manquante"}), 400
+        return jsonify(success=False, error="URL manquante")
 
     try:
         response = requests.get(url, timeout=10)
         soup = BeautifulSoup(response.text, "html.parser")
 
-        # Exemple d’analyse simple
-        title = soup.title.string if soup.title else "Aucun"
+        title = soup.title.string.strip() if soup.title else "Aucun titre"
         description = soup.find("meta", attrs={"name": "description"})
-        description = description["content"] if description else "Aucune"
-        h1 = soup.find("h1").text if soup.find("h1") else "Aucun"
+        description = description["content"].strip() if description else "Aucune meta description"
+        h1 = soup.find("h1")
+        h1 = h1.get_text(strip=True) if h1 else "Aucune balise H1"
 
-        audit_result = {
-            "url": url,
+        return jsonify(success=True, data={
             "title": title,
             "description": description,
             "h1": h1
-        }
-
-        return jsonify({"success": True, "data": audit_result})
+        })
 
     except Exception as e:
-        return jsonify({"success": False, "error": str(e)}), 500
+        return jsonify(success=False, error=str(e))
+
+# ✅ Partie importante pour Render
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
